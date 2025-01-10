@@ -1,4 +1,5 @@
 from flask import Flask, request, render_template_string
+from itertools import permutations
 
 app = Flask(__name__)
 
@@ -38,34 +39,24 @@ def solve():
     try:
         with open(wordlist_path, 'r', encoding='utf-8') as file:
             lines = file.readlines()
+
         lines = [line.strip() for line in lines]
-        # 5-letter words only
+        # Five letter words only
         lines = [line for line in lines if len(line) == 5]
+        wordlist = set(lines)
 
         letters = list(available_letters)
-        legal_words = []
 
-        for line in lines:
-            line_of_dic = list(line)
-            if all(line_of_dic.count(char) <= letters.count(char) for char in line_of_dic):
-                legal_words.append(''.join(line_of_dic))
+        # Permutates every combination. Creates two words from the permutation
+        # where the third letter is the same. If both exist in the wordlist == match
+        for perm in permutations(letters):
+            word1 = ''.join(perm[:5])
+            word2 = ''.join(list(perm[5:7]) + list(perm[2]) + list(perm[7:]))
 
-        for word_one in legal_words:
-            for word_two in legal_words:
-                if word_one == word_two:
-                    continue
-                if word_one[2] == word_two[2]:
-                    letters_verify = letters.copy()
-                    combination = list(word_one) + list(word_two)
-                    for char in letters_verify:
-                        try:
-                            combination.remove(char)
-                        except ValueError:
-                            pass
-                    if combination[0] == word_one[2] and len(combination) == 1:
-                        result = f"{word_one}, {word_two}"
-                        return render_template_string(HTML_TEMPLATE, result=result)
-        return render_template_string(HTML_TEMPLATE, result="No solution found.")
+            if word1 in wordlist and word2 in wordlist:
+                result = f"{word1}, {word2}"
+                return render_template_string(HTML_TEMPLATE, result=result)
+        return render_template_string(HTML_TEMPLATE, result="Ingen løsning funnet.")
 
     except Exception as e:
         return render_template_string(HTML_TEMPLATE, result=f"Error: {e}")
