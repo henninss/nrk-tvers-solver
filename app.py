@@ -17,8 +17,8 @@ HTML_TEMPLATE = '''
         <button type="submit">Solve</button>
     </form>
     {% if result %}
-    <h2>Løsning:</h2>
-    <p>{{ result }}</p>
+    <h2>Mulige løsninger:</h2>
+    <p>{{ result | safe }}</p>
     {% endif %}
 </body>
 <footer style="position: absolute; bottom: 0;">
@@ -47,6 +47,7 @@ def solve():
 
         letters = list(available_letters)
 
+        solutions = set()
         # Permutates every combination. Creates two words from the permutation
         # where the third letter is the same. If both exist in the wordlist == match
         for perm in permutations(letters):
@@ -54,10 +55,17 @@ def solve():
             word2 = ''.join(list(perm[5:7]) + list(perm[2]) + list(perm[7:]))
 
             if word1 in wordlist and word2 in wordlist:
-                result = f"{word1}, {word2}"
-                return render_template_string(HTML_TEMPLATE, result=result)
-        return render_template_string(HTML_TEMPLATE, result="Ingen løsning funnet.")
+                solutions.add(tuple(sorted([word1, word2])))
 
+        if len(solutions) == 0:
+            return render_template_string(HTML_TEMPLATE, result="Ingen løsning funnet.")
+
+        solutions = sorted(solutions, key=lambda x: x[0]+x[1])
+        printer = ''
+        for solution in solutions:
+            printer += f'{solution[0]}, {solution[1]}<br>'
+
+        return render_template_string(HTML_TEMPLATE, result=printer)
     except Exception as e:
         return render_template_string(HTML_TEMPLATE, result=f"Error: {e}")
 
