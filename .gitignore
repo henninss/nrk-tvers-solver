@@ -11,3 +11,6 @@ venv
 
 # Past solutions used for testing
 past_solutions.txt
+
+# nohup
+output.txt

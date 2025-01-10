@@ -62,5 +62,5 @@ def solve():
         return render_template_string(HTML_TEMPLATE, result=f"Error: {e}")
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()
 
